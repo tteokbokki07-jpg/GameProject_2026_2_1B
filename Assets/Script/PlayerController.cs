@@ -4,6 +4,12 @@ using UnityEditor;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+public enum PlayerState //플레이어 상태
+{
+    Normal,
+    PickUp,
+}
+
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Animator animator;
@@ -19,6 +25,7 @@ public class PlayerController : MonoBehaviour
 
     private CharacterController controller;
     private float verticalVelocity;
+    private PlayerState currentState = PlayerState.Normal;
 
     private void Awake()
     {
@@ -36,6 +43,16 @@ public class PlayerController : MonoBehaviour
         {
             return;
         }
+        ApplyGravity(); //언제나 작동하는 중력
+
+        //normal 상태가 아니라면 이동 입력 받지 않음
+        if (currentState != PlayerState.Normal) return;
+
+        HandleMovement(keyboard);
+    }
+
+    private void HandleMovement(Keyboard keyboard)
+    {
         //이동
         Vector2 input = Vector2.zero;
 
@@ -74,6 +91,19 @@ public class PlayerController : MonoBehaviour
             transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
         }
 
+
+        //애니메이션
+        float animationSpeed = 0f;
+        if (moveDirection.sqrMagnitude > 0.001f)
+        {
+            animationSpeed = isRunning ? 1f : 0.5f;
+        }
+        animator.SetFloat("speed", animationSpeed, 0.1f, Time.deltaTime);
+
+    }
+
+    private void ApplyGravity()
+    {
         //중력
         if (controller.isGrounded && verticalVelocity < 0f)
         {
@@ -84,15 +114,16 @@ public class PlayerController : MonoBehaviour
             verticalVelocity += gravity * Time.deltaTime;
         }
         controller.Move(Vector3.up * verticalVelocity * Time.deltaTime);
-
-        //애니메이션
-        float animationSpeed = 0f;
-        if (moveDirection.sqrMagnitude > 0.001f)
-        {
-            animationSpeed = isRunning ? 1f : 0.5f;
-        }
-        animator.SetFloat("speed", animationSpeed, 0.1f, Time.deltaTime);
     }
 
+    public void ChangeState(PlayerState newstate)
+    {
+        currentState = newstate;
+        if (currentState != PlayerState.Normal)
+        {
+            animator.SetFloat("speed", 0);
+        }
+        Debug.Log("현재 상태 : " + currentState);
+    }    
 
 }
