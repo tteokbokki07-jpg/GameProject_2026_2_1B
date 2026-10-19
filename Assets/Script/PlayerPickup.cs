@@ -181,7 +181,7 @@ public class PlayerPickup : MonoBehaviour
         playerController.ChangeState(PlayerState.PickUp);
 
         // 전환선 없이 PickUp01 상태로 이동한다.
-        animator.CrossFade("PickUp01", 0.1f);
+        animator.CrossFade("PickUp", 0.1f);
 
         // 손이 아이템에 닿는 시점까지 기다린다.
         yield return new WaitForSeconds(pickupMoment);
