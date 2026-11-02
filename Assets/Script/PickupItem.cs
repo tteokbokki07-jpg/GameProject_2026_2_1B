@@ -12,10 +12,12 @@ public class PickupItem : MonoBehaviour
     [SerializeField] private float floatingHeight = 0.15f;
     [SerializeField] private float floatingSpeed = 2f;
     private Vector3 startPosition;
+    private SimpleInventory inventory;
 
     private void Awake()
     {
         questManager = FindFirstObjectByType<QuestManager>();
+        inventory = FindFirstObjectByType<SimpleInventory>();
     }
 
     void Start()
@@ -33,8 +35,20 @@ public class PickupItem : MonoBehaviour
 
     public void Collect()
     {
-        Debug.Log(itemName + " " + amount + "개 획득");
-        questManager.AddQuestItem(itemName, amount);
+        if (inventory == null)
+        {
+            Debug.Log("not found inventory");
+            return;
+        }
+        if (inventory.AddItem(itemName, amount) == false)
+        {
+            return;
+        }
+        Debug.Log(itemName + "" + amount + " collected");
+        if (questManager != null)
+        {
+            questManager.AddQuestItem(itemName, amount);
+        }
         Destroy(gameObject);
     }
 
